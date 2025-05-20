@@ -147,4 +147,3 @@ st.markdown("""
     Brachyanalysis - Visualizador de imágenes DICOM
 </div>
 """, unsafe_allow_html=True)
-
