@@ -10,6 +10,8 @@ import streamlit as st
 import SimpleITK as sitk
 from skimage.transform import resize
 import plotly.graph_objects as go
+import matplotlib
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 st.set_page_config(layout="wide", page_title="Brachyanalysis")
 
@@ -82,10 +84,8 @@ if img is not None:
     default_wc = min_val + default_ww / 2
     ww, wc = default_ww, default_wc
 
-    # Control de corte (eje)
     corte = st.sidebar.radio("Selecciona el tipo de corte", ("Axial", "Coronal", "Sagital"))
-    
-    # Validación de índices para cada tipo de corte
+
     if corte == "Axial":
         corte_idx = st.sidebar.slider("Selecciona el índice axial", 0, n_ax - 1, n_ax // 2)
         axial_img = img[corte_idx, :, :]
@@ -108,67 +108,51 @@ if img is not None:
         ax.imshow(apply_window_level(slice2d, ww, wc), cmap='gray', origin='lower')
         return fig
 
-    # Establecer cuadrantes según la cantidad de imágenes
-    rows = 2
-    cols = 2
+    rows, cols = 2, 2
     fig, axs = plt.subplots(rows, cols, figsize=(10, 10))
-
-    # Crear las imágenes para cada cuadrante
-    images_to_show = [
-        axial_img,   # Axial
-        coronal_img, # Coronal
-        sagital_img, # Sagital
-        img[corte_idx, :, :]  # Imagen seleccionada de acuerdo al corte
-    ]
+    images_to_show = [axial_img, coronal_img, sagital_img, img[corte_idx, :, :]]
 
     for i in range(4):
         row = i // cols
         col = i % cols
-        ax = axs[row, col]  # Seleccionar el cuadrante correspondiente
+        ax = axs[row, col]
         ax.axis('off')
         ax.imshow(apply_window_level(images_to_show[i], ww, wc), cmap='gray', origin='lower')
 
     st.pyplot(fig)
 
-import matplotlib
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-
-# Crear figura interactiva para seleccionar puntos
-if corte == "Axial":
-    img_to_draw = axial_img
-elif corte == "Coronal":
-    img_to_draw = coronal_img
-else:
-    img_to_draw = sagital_img
-
-fig_select, ax_select = plt.subplots()
-ax_select.imshow(apply_window_level(img_to_draw, ww, wc), cmap='gray', origin='lower')
-ax_select.set_title("Haz clic en dos puntos para unirlos con una línea")
-clicked_points = []
-
-# Función de evento de clic
-def onclick(event):
-    if event.inaxes != ax_select:
-        return
-    if len(clicked_points) < 2:
-        clicked_points.append((event.xdata, event.ydata))
-        ax_select.plot(event.xdata, event.ydata, 'ro')
-        if len(clicked_points) == 2:
-            x_vals = [clicked_points[0][0], clicked_points[1][0]]
-            y_vals = [clicked_points[0][1], clicked_points[1][1]]
-            ax_select.plot(x_vals, y_vals, 'r-')
-            canvas.draw()
+    # Figura para seleccionar puntos
+    if corte == "Axial":
+        img_to_draw = axial_img
+    elif corte == "Coronal":
+        img_to_draw = coronal_img
     else:
-        st.warning("Ya seleccionaste dos puntos. Recarga para seleccionar nuevos.")
+        img_to_draw = sagital_img
 
-canvas = FigureCanvas(fig_select)
-fig_select.canvas.mpl_connect('button_press_event', onclick)
+    fig_select, ax_select = plt.subplots()
+    ax_select.imshow(apply_window_level(img_to_draw, ww, wc), cmap='gray', origin='lower')
+    ax_select.set_title("Haz clic en dos puntos para unirlos con una línea")
+    clicked_points = []
 
-# Mostrar figura con puntos seleccionados
-st.pyplot(fig_select)
+    def onclick(event):
+        if event.inaxes != ax_select:
+            return
+        if len(clicked_points) < 2:
+            clicked_points.append((event.xdata, event.ydata))
+            ax_select.plot(event.xdata, event.ydata, 'ro')
+            if len(clicked_points) == 2:
+                x_vals = [clicked_points[0][0], clicked_points[1][0]]
+                y_vals = [clicked_points[0][1], clicked_points[1][1]]
+                ax_select.plot(x_vals, y_vals, 'r-')
+                canvas.draw()
+        else:
+            st.warning("Ya seleccionaste dos puntos. Recarga para seleccionar nuevos.")
 
+    canvas = FigureCanvas(fig_select)
+    fig_select.canvas.mpl_connect('button_press_event', onclick)
+    st.pyplot(fig_select)
 
-    
+    # Vista 3D
     target_shape = (64, 64, 64)
     img_resized = resize(original_image, target_shape, anti_aliasing=True)
     x, y, z = np.mgrid[0:target_shape[0], 0:target_shape[1], 0:target_shape[2]]
@@ -180,7 +164,6 @@ st.pyplot(fig_select)
         colorscale="Gray",
     ))
     fig3d.update_layout(margin=dict(l=0, r=0, b=0, t=0))
-
     st.subheader("Vista 3D")
     st.plotly_chart(fig3d, use_container_width=True)
 
