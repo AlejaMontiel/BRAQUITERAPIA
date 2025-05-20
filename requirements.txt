@@ -5,4 +5,4 @@ SimpleITK
 plotly>=5.0.0
 scikit-image
 pydicom
-pip install streamlit-drawable-canvas
+streamlit-drawable-canvas
