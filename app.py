@@ -82,31 +82,54 @@ if img is not None:
     default_wc = min_val + default_ww / 2
     ww, wc = default_ww, default_wc
 
-    st.markdown('<h2 style="color:#28aec5;text-align:center;">Vistas 2D: Axial, Coronal y Sagital</h2>', unsafe_allow_html=True)
-    col1, col2, col3 = st.columns(3)
+    # Control de corte (eje)
+    corte = st.sidebar.radio("Selecciona el tipo de corte", ("Axial", "Coronal", "Sagital"))
+    
+    # Validación de índices para cada tipo de corte
+    if corte == "Axial":
+        corte_idx = st.sidebar.slider("Selecciona el índice axial", 0, n_ax - 1, n_ax // 2)
+        axial_img = img[corte_idx, :, :]
+        coronal_img = img[:, n_cor // 2, :]
+        sagital_img = img[:, :, n_sag // 2]
+    elif corte == "Coronal":
+        corte_idx = st.sidebar.slider("Selecciona el índice coronal", 0, n_cor - 1, n_cor // 2)
+        coronal_img = img[:, corte_idx, :]
+        axial_img = img[corte_idx, :, :]
+        sagital_img = img[:, :, n_sag // 2]
+    elif corte == "Sagital":
+        corte_idx = st.sidebar.slider("Selecciona el índice sagital", 0, n_sag - 1, n_sag // 2)
+        sagital_img = img[:, :, corte_idx]
+        axial_img = img[corte_idx, :, :]
+        coronal_img = img[:, n_cor // 2, :]
 
-    axial_idx = col1.slider("Índice axial", 0, n_ax - 1, n_ax // 2, key="axial")
-    coronal_idx = col2.slider("Índice coronal", 0, n_cor - 1, n_cor // 2, key="coronal")
-    sagital_idx = col3.slider("Índice sagital", 0, n_sag - 1, n_sag // 2, key="sagital")
-
-    axial_img = img[axial_idx, :, :]
-    coronal_img = img[:, coronal_idx, :]
-    sagital_img = img[:, :, sagital_idx]
-
-    def show_slice(img_slice, title):
+    def render2d(slice2d):
         fig, ax = plt.subplots()
         ax.axis('off')
-        ax.set_title(title, color='#28aec5', fontsize=12)
-        ax.imshow(apply_window_level(img_slice, ww, wc), cmap='gray', origin='lower')
+        ax.imshow(apply_window_level(slice2d, ww, wc), cmap='gray', origin='lower')
         return fig
 
-    col1.pyplot(show_slice(axial_img, "Vista Axial"))
-    col2.pyplot(show_slice(coronal_img, "Vista Coronal"))
-    col3.pyplot(show_slice(sagital_img, "Vista Sagital"))
+    # Establecer cuadrantes según la cantidad de imágenes
+    rows = 2
+    cols = 2
+    fig, axs = plt.subplots(rows, cols, figsize=(10, 10))
 
-    st.markdown('<h2 style="color:#28aec5;text-align:center;margin-top:50px;">Reconstrucción 3D</h2>', unsafe_allow_html=True)
+    # Crear las imágenes para cada cuadrante
+    images_to_show = [
+        axial_img,   # Axial
+        coronal_img, # Coronal
+        sagital_img, # Sagital
+        img[corte_idx, :, :]  # Imagen seleccionada de acuerdo al corte
+    ]
 
-    # Vista 3D
+    for i in range(4):
+        row = i // cols
+        col = i % cols
+        ax = axs[row, col]  # Seleccionar el cuadrante correspondiente
+        ax.axis('off')
+        ax.imshow(apply_window_level(images_to_show[i], ww, wc), cmap='gray', origin='lower')
+
+    st.pyplot(fig)
+
     target_shape = (64, 64, 64)
     img_resized = resize(original_image, target_shape, anti_aliasing=True)
     x, y, z = np.mgrid[0:target_shape[0], 0:target_shape[1], 0:target_shape[2]]
@@ -117,6 +140,15 @@ if img is not None:
         surface_count=15,
         colorscale="Gray",
     ))
-    fig3d.update_layout(margin=dict(l=10, r=10, t=10, b=10))
+    fig3d.update_layout(margin=dict(l=0, r=0, b=0, t=0))
 
+    st.subheader("Vista 3D")
     st.plotly_chart(fig3d, use_container_width=True)
+
+st.markdown('<p class="giant-title">Brachyanalysis</p>', unsafe_allow_html=True)
+st.markdown("""
+<hr>
+<div style="text-align:center;color:#28aec5;font-size:14px;">
+    Brachyanalysis - Visualizador de imágenes DICOM
+</div>
+""", unsafe_allow_html=True)
