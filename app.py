@@ -103,48 +103,49 @@ if img is not None:
 
     # Mostrar imágenes 2D en una fila
     row1_col1, row1_col2 = st.columns(2)
-with row1_col1:
-    st.markdown("**Axial**")
-    fig1, ax1 = plt.subplots()
-    ax1.axis('off')
-    ax1.imshow(apply_window_level(axial_img, ww, wc), cmap='gray', origin='lower')
-    st.pyplot(fig1)
+    with row1_col1:
+        st.markdown("**Axial**")
+        fig1, ax1 = plt.subplots()
+        ax1.axis('off')
+        ax1.imshow(apply_window_level(axial_img, ww, wc), cmap='gray', origin='lower')
+        st.pyplot(fig1)
 
-with row1_col2:
-    st.markdown("**Coronal**")
-    fig2, ax2 = plt.subplots()
-    ax2.axis('off')
-    ax2.imshow(apply_window_level(coronal_img, ww, wc), cmap='gray', origin='lower')
-    st.pyplot(fig2)
+    with row1_col2:
+        st.markdown("**Coronal**")
+        fig2, ax2 = plt.subplots()
+        ax2.axis('off')
+        ax2.imshow(apply_window_level(coronal_img, ww, wc), cmap='gray', origin='lower')
+        st.pyplot(fig2)
 
-row2_col1, row2_col2 = st.columns([2, 1])
-with row2_col1:
-    st.markdown("**Sagital**")
-    fig3, ax3 = plt.subplots()
-    ax3.axis('off')
-    ax3.imshow(apply_window_level(sagital_img, ww, wc), cmap='gray', origin='lower')
-    st.pyplot(fig3)
+    row2_col1, row2_col2 = st.columns([2, 1])
+    with row2_col1:
+        st.markdown("**Sagital**")
+        fig3, ax3 = plt.subplots()
+        ax3.axis('off')
+        ax3.imshow(apply_window_level(sagital_img, ww, wc), cmap='gray', origin='lower')
+        st.pyplot(fig3)
 
-with row2_col2:
-    st.markdown("**Logo**")
-    st.image("ruta/al/logo.png", width=150)  # Cambia la ruta por tu logo real
+    with row2_col2:
+        st.markdown("**Logo**")
+        st.image("ruta/al/logo.png", width=150)  # Cambia la ruta por tu logo real
 
-    # Imagen 3D
-    target_shape = (64, 64, 64)
-    img_resized = resize(original_image, target_shape, anti_aliasing=True)
-    x, y, z = np.mgrid[0:target_shape[0], 0:target_shape[1], 0:target_shape[2]]
-    fig3d = go.Figure(data=go.Volume(
-        x=x.flatten(), y=y.flatten(), z=z.flatten(),
-        value=img_resized.flatten(),
-        opacity=0.1,
-        surface_count=15,
-        colorscale="Gray",
-    ))
-    fig3d.update_layout(margin=dict(l=0, r=0, b=0, t=0))
+        # Imagen 3D
+        target_shape = (64, 64, 64)
+        img_resized = resize(original_image, target_shape, anti_aliasing=True)
+        x, y, z = np.mgrid[0:target_shape[0], 0:target_shape[1], 0:target_shape[2]]
+        fig3d = go.Figure(data=go.Volume(
+            x=x.flatten(), y=y.flatten(), z=z.flatten(),
+            value=img_resized.flatten(),
+            opacity=0.1,
+            surface_count=15,
+            colorscale="Gray",
+        ))
+        fig3d.update_layout(margin=dict(l=0, r=0, b=0, t=0))
 
-    st.subheader("Vista 3D")
-    st.plotly_chart(fig3d, use_container_width=True)
+        st.subheader("Vista 3D")
+        st.plotly_chart(fig3d, use_container_width=True)
 
+# Título y pie de página fuera del bloque
 st.markdown('<p class="giant-title">Brachyanalysis</p>', unsafe_allow_html=True)
 st.markdown("""
 <hr>
