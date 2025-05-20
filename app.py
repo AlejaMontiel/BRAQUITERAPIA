@@ -102,27 +102,34 @@ if img is not None:
         coronal_img = img[:, n_cor // 2, :]
 
     # Mostrar imágenes 2D en una fila
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("**Axial**")
-        fig1, ax1 = plt.subplots()
-        ax1.axis('off')
-        ax1.imshow(apply_window_level(axial_img, ww, wc), cmap='gray', origin='lower')
-        st.pyplot(fig1)
+# Tres columnas, con proporciones para que la 2 sea un poco más ancha y la 3 no muy grande
+col1, col2, col3 = st.columns([1, 1, 0.5])
 
-    with col2:
-        st.markdown("**Coronal**")
-        fig2, ax2 = plt.subplots()
-        ax2.axis('off')
-        ax2.imshow(apply_window_level(coronal_img, ww, wc), cmap='gray', origin='lower')
-        st.pyplot(fig2)
+with col1:
+    st.markdown("**Axial**")
+    fig1, ax1 = plt.subplots()
+    ax1.axis('off')
+    ax1.imshow(apply_window_level(axial_img, ww, wc), cmap='gray', origin='lower')
+    st.pyplot(fig1)
 
-    with col3:
-        st.markdown("**Sagital**")
-        fig3, ax3 = plt.subplots()
-        ax3.axis('off')
-        ax3.imshow(apply_window_level(sagital_img, ww, wc), cmap='gray', origin='lower')
-        st.pyplot(fig3)
+with col2:
+    st.markdown("**Coronal**")
+    fig2, ax2 = plt.subplots()
+    ax2.axis('off')
+    ax2.imshow(apply_window_level(coronal_img, ww, wc), cmap='gray', origin='lower')
+    st.pyplot(fig2)
+
+    st.markdown("**Sagital**")
+    fig3, ax3 = plt.subplots()
+    ax3.axis('off')
+    ax3.imshow(apply_window_level(sagital_img, ww, wc), cmap='gray', origin='lower')
+    st.pyplot(fig3)
+
+with col3:
+    st.markdown("**Logo de la empresa**")
+    # Aquí cargas el logo
+    # Ejemplo si tienes la imagen en archivo local o URL:
+    st.image("AUNA.png", width=150)
 
     # Imagen 3D
     target_shape = (64, 64, 64)
