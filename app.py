@@ -102,7 +102,7 @@ if img is not None:
         coronal_img = img[:, n_cor // 2, :]
 
     # Mostrar imágenes 2D en una fila
-  row1_col1, row1_col2 = st.columns(2)
+    row1_col1, row1_col2 = st.columns(2)
 with row1_col1:
     st.markdown("**Axial**")
     fig1, ax1 = plt.subplots()
