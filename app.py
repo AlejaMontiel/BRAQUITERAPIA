@@ -127,7 +127,7 @@ if img is not None:
 
     with row2_col2:
         st.markdown("**Logo**")
-        st.image("ruta/al/logo.png", width=150)  # Cambia la ruta por tu logo real
+        st.image("AUNA.jpg", width=150)  # Cambia la ruta por tu logo real
 
         # Imagen 3D
         target_shape = (64, 64, 64)
@@ -153,3 +153,4 @@ st.markdown("""
     Brachyanalysis - Visualizador de imágenes DICOM
 </div>
 """, unsafe_allow_html=True)
+
