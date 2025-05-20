@@ -10,8 +10,8 @@ import streamlit as st
 import SimpleITK as sitk
 from skimage.transform import resize
 import plotly.graph_objects as go
+from streamlit_drawable_canvas import st_canvas
 import matplotlib
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 st.set_page_config(layout="wide", page_title="Brachyanalysis")
 
@@ -94,12 +94,12 @@ if img is not None:
     elif corte == "Coronal":
         corte_idx = st.sidebar.slider("Selecciona el índice coronal", 0, n_cor - 1, n_cor // 2)
         coronal_img = img[:, corte_idx, :]
-        axial_img = img[corte_idx, :, :]
+        axial_img = img[n_ax // 2, :, :]
         sagital_img = img[:, :, n_sag // 2]
     elif corte == "Sagital":
         corte_idx = st.sidebar.slider("Selecciona el índice sagital", 0, n_sag - 1, n_sag // 2)
         sagital_img = img[:, :, corte_idx]
-        axial_img = img[corte_idx, :, :]
+        axial_img = img[n_ax // 2, :, :]
         coronal_img = img[:, n_cor // 2, :]
 
     def render2d(slice2d):
@@ -121,7 +121,7 @@ if img is not None:
 
     st.pyplot(fig)
 
-    # Figura para seleccionar puntos
+    # Imagen para el canvas
     if corte == "Axial":
         img_to_draw = axial_img
     elif corte == "Coronal":
@@ -129,28 +129,31 @@ if img is not None:
     else:
         img_to_draw = sagital_img
 
-    fig_select, ax_select = plt.subplots()
-    ax_select.imshow(apply_window_level(img_to_draw, ww, wc), cmap='gray', origin='lower')
-    ax_select.set_title("Haz clic en dos puntos para unirlos con una línea")
-    clicked_points = []
+    # Mostrar imagen y permitir clics con streamlit_drawable_canvas
+    st.subheader("Selecciona dos puntos sobre la imagen")
+    canvas_result = st_canvas(
+        fill_color="rgba(255, 0, 0, 0.3)",  # Color de relleno del círculo
+        stroke_width=3,
+        background_image=plt.imread(io.BytesIO(
+            matplotlib.pyplot.imsave(buf := io.BytesIO(), apply_window_level(img_to_draw, ww, wc), format='png') or buf
+        )),
+        update_streamlit=True,
+        height=img_to_draw.shape[0],
+        width=img_to_draw.shape[1],
+        drawing_mode="point",
+        point_display_radius=5,
+        key="canvas"
+    )
 
-    def onclick(event):
-        if event.inaxes != ax_select:
-            return
-        if len(clicked_points) < 2:
-            clicked_points.append((event.xdata, event.ydata))
-            ax_select.plot(event.xdata, event.ydata, 'ro')
-            if len(clicked_points) == 2:
-                x_vals = [clicked_points[0][0], clicked_points[1][0]]
-                y_vals = [clicked_points[0][1], clicked_points[1][1]]
-                ax_select.plot(x_vals, y_vals, 'r-')
-                canvas.draw()
-        else:
-            st.warning("Ya seleccionaste dos puntos. Recarga para seleccionar nuevos.")
-
-    canvas = FigureCanvas(fig_select)
-    fig_select.canvas.mpl_connect('button_press_event', onclick)
-    st.pyplot(fig_select)
+    if canvas_result.json_data is not None:
+        objects = canvas_result.json_data["objects"]
+        if len(objects) == 2:
+            p1 = objects[0]["left"], objects[0]["top"]
+            p2 = objects[1]["left"], objects[1]["top"]
+            st.success(f"Puntos seleccionados: {p1} y {p2}")
+            st.write("Puedes trazar una línea entre ellos en una figura si lo deseas.")
+        elif len(objects) > 2:
+            st.warning("Solo se permiten dos puntos. Recarga la página para reiniciar.")
 
     # Vista 3D
     target_shape = (64, 64, 64)
