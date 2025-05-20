@@ -129,7 +129,7 @@ with col3:
     st.markdown("**Logo de la empresa**")
     # Aquí cargas el logo
     # Ejemplo si tienes la imagen en archivo local o URL:
-    st.image("AUNA.png", width=150)
+    st.image("AUNA.jpg", width=150)
 
     # Imagen 3D
     target_shape = (64, 64, 64)
