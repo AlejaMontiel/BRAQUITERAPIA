@@ -130,6 +130,45 @@ if img is not None:
 
     st.pyplot(fig)
 
+import matplotlib
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+
+# Crear figura interactiva para seleccionar puntos
+if corte == "Axial":
+    img_to_draw = axial_img
+elif corte == "Coronal":
+    img_to_draw = coronal_img
+else:
+    img_to_draw = sagital_img
+
+fig_select, ax_select = plt.subplots()
+ax_select.imshow(apply_window_level(img_to_draw, ww, wc), cmap='gray', origin='lower')
+ax_select.set_title("Haz clic en dos puntos para unirlos con una línea")
+clicked_points = []
+
+# Función de evento de clic
+def onclick(event):
+    if event.inaxes != ax_select:
+        return
+    if len(clicked_points) < 2:
+        clicked_points.append((event.xdata, event.ydata))
+        ax_select.plot(event.xdata, event.ydata, 'ro')
+        if len(clicked_points) == 2:
+            x_vals = [clicked_points[0][0], clicked_points[1][0]]
+            y_vals = [clicked_points[0][1], clicked_points[1][1]]
+            ax_select.plot(x_vals, y_vals, 'r-')
+            canvas.draw()
+    else:
+        st.warning("Ya seleccionaste dos puntos. Recarga para seleccionar nuevos.")
+
+canvas = FigureCanvas(fig_select)
+fig_select.canvas.mpl_connect('button_press_event', onclick)
+
+# Mostrar figura con puntos seleccionados
+st.pyplot(fig_select)
+
+
+    
     target_shape = (64, 64, 64)
     img_resized = resize(original_image, target_shape, anti_aliasing=True)
     x, y, z = np.mgrid[0:target_shape[0], 0:target_shape[1], 0:target_shape[2]]
