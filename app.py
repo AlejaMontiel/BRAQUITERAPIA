@@ -102,27 +102,32 @@ if img is not None:
         coronal_img = img[:, n_cor // 2, :]
 
     # Mostrar imágenes 2D en una fila
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("**Axial**")
-        fig1, ax1 = plt.subplots()
-        ax1.axis('off')
-        ax1.imshow(apply_window_level(axial_img, ww, wc), cmap='gray', origin='lower')
-        st.pyplot(fig1)
+   row1_col1, row1_col2 = st.columns(2)
+with row1_col1:
+    st.markdown("**Axial**")
+    fig1, ax1 = plt.subplots()
+    ax1.axis('off')
+    ax1.imshow(apply_window_level(axial_img, ww, wc), cmap='gray', origin='lower')
+    st.pyplot(fig1)
 
-    with col2:
-        st.markdown("**Coronal**")
-        fig2, ax2 = plt.subplots()
-        ax2.axis('off')
-        ax2.imshow(apply_window_level(coronal_img, ww, wc), cmap='gray', origin='lower')
-        st.pyplot(fig2)
+with row1_col2:
+    st.markdown("**Coronal**")
+    fig2, ax2 = plt.subplots()
+    ax2.axis('off')
+    ax2.imshow(apply_window_level(coronal_img, ww, wc), cmap='gray', origin='lower')
+    st.pyplot(fig2)
 
-    with col3:
-        st.markdown("**Sagital**")
-        fig3, ax3 = plt.subplots()
-        ax3.axis('off')
-        ax3.imshow(apply_window_level(sagital_img, ww, wc), cmap='gray', origin='lower')
-        st.pyplot(fig3)
+row2_col1, row2_col2 = st.columns(2)
+with row2_col1:
+    st.markdown("**Sagital**")
+    fig3, ax3 = plt.subplots()
+    ax3.axis('off')
+    ax3.imshow(apply_window_level(sagital_img, ww, wc), cmap='gray', origin='lower')
+    st.pyplot(fig3)
+
+with row2_col2:
+    st.markdown("**Logo**")
+    st.image("AUNA.jpg", use_column_width=True)
 
     # Imagen 3D
     target_shape = (64, 64, 64)
