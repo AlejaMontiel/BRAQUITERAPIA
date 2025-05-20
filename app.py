@@ -3,8 +3,6 @@ import io
 import zipfile
 import tempfile
 
-pip install streamlit-drawable-canvas
-
 
 import numpy as np
 import matplotlib.pyplot as plt
