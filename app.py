@@ -119,7 +119,7 @@ if img is not None:
 
     with col3:
         st.markdown("**Logo**")
-        st.image("ruta/al/logo.png", width=150)  # Asegúrate de ajustar esta ruta
+        st.image("AUNA.jpg", width=150)  # Asegúrate de ajustar esta ruta
 
     # Segunda fila: Sagital (centrado y grande)
     st.markdown("**Sagital**")
