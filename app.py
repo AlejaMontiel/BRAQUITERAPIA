@@ -13,6 +13,7 @@ import plotly.graph_objects as go
 
 st.set_page_config(layout="wide", page_title="Brachyanalysis")
 
+# Estilos
 st.markdown("""
 <style>
     .giant-title { color: #28aec5; text-align: center; font-size: 72px; margin: 30px 0; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
@@ -82,10 +83,8 @@ if img is not None:
     default_wc = min_val + default_ww / 2
     ww, wc = default_ww, default_wc
 
-    # Control de corte (eje)
     corte = st.sidebar.radio("Selecciona el tipo de corte", ("Axial", "Coronal", "Sagital"))
-    
-    # Validación de índices para cada tipo de corte
+
     if corte == "Axial":
         corte_idx = st.sidebar.slider("Selecciona el índice axial", 0, n_ax - 1, n_ax // 2)
         axial_img = img[corte_idx, :, :]
@@ -94,42 +93,38 @@ if img is not None:
     elif corte == "Coronal":
         corte_idx = st.sidebar.slider("Selecciona el índice coronal", 0, n_cor - 1, n_cor // 2)
         coronal_img = img[:, corte_idx, :]
-        axial_img = img[corte_idx, :, :]
+        axial_img = img[n_ax // 2, :, :]
         sagital_img = img[:, :, n_sag // 2]
     elif corte == "Sagital":
         corte_idx = st.sidebar.slider("Selecciona el índice sagital", 0, n_sag - 1, n_sag // 2)
         sagital_img = img[:, :, corte_idx]
-        axial_img = img[corte_idx, :, :]
+        axial_img = img[n_ax // 2, :, :]
         coronal_img = img[:, n_cor // 2, :]
 
-    def render2d(slice2d):
-        fig, ax = plt.subplots()
-        ax.axis('off')
-        ax.imshow(apply_window_level(slice2d, ww, wc), cmap='gray', origin='lower')
-        return fig
+    # Mostrar imágenes 2D en una fila
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("**Axial**")
+        fig1, ax1 = plt.subplots()
+        ax1.axis('off')
+        ax1.imshow(apply_window_level(axial_img, ww, wc), cmap='gray', origin='lower')
+        st.pyplot(fig1)
 
-    # Establecer cuadrantes según la cantidad de imágenes
-    rows = 2
-    cols = 2
-    fig, axs = plt.subplots(rows, cols, figsize=(10, 10))
+    with col2:
+        st.markdown("**Coronal**")
+        fig2, ax2 = plt.subplots()
+        ax2.axis('off')
+        ax2.imshow(apply_window_level(coronal_img, ww, wc), cmap='gray', origin='lower')
+        st.pyplot(fig2)
 
-    # Crear las imágenes para cada cuadrante
-    images_to_show = [
-        axial_img,   # Axial
-        coronal_img, # Coronal
-        sagital_img, # Sagital
-        img[corte_idx, :, :]  # Imagen seleccionada de acuerdo al corte
-    ]
+    with col3:
+        st.markdown("**Sagital**")
+        fig3, ax3 = plt.subplots()
+        ax3.axis('off')
+        ax3.imshow(apply_window_level(sagital_img, ww, wc), cmap='gray', origin='lower')
+        st.pyplot(fig3)
 
-    for i in range(4):
-        row = i // cols
-        col = i % cols
-        ax = axs[row, col]  # Seleccionar el cuadrante correspondiente
-        ax.axis('off')
-        ax.imshow(apply_window_level(images_to_show[i], ww, wc), cmap='gray', origin='lower')
-
-    st.pyplot(fig)
-
+    # Imagen 3D
     target_shape = (64, 64, 64)
     img_resized = resize(original_image, target_shape, anti_aliasing=True)
     x, y, z = np.mgrid[0:target_shape[0], 0:target_shape[1], 0:target_shape[2]]
